@@ -1,0 +1,2 @@
+const table: SymbolTable{false: 5, 0: 4, "number is prime": 6, 1: 3, 2: 2, "number is not prime": 7, true: 1, }
+identifier table:SymbolTable{$i: 3, $num: 1, $prime: 2, }
