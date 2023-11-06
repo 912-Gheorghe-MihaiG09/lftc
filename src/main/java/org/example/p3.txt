@@ -1,0 +1,14 @@
+Program {
+ int $num
+ int $sum -> 0
+
+ scan($num)
+ $sum -> $sum + $num
+
+ while($num != 0) [
+  scan($num)
+  $sum -> $sum + $num  
+ ] 
+ 
+ print($sum)
+}

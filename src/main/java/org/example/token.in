@@ -1,0 +1,33 @@
+// keywords
+Program
+int
+string
+bool
+for
+while
+if
+else
+scan
+print
+break
+// separator
+{
+}
+(
+)
+[
+]
+,
+// operators
+->
+>=
+<=
+=
+!=
+=>
+=<
++
+-
+/
+*
+%

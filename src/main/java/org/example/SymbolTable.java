@@ -17,18 +17,18 @@ class SymbolTable {
     }
 
     // Add a symbol to the symbol table
-    public void add(String symbol) {
+    public Integer add(String symbol) {
         if (symbol == null) {
             throw new IllegalArgumentException("Symbol cannot be null");
         }
 
         if(this.contains(symbol)) {
-            System.out.println(symbol + " is already in the table");
-            return;
+            return this.hashTable.get(symbol);
         }
 
         codeValue++;
         hashTable.add(symbol, codeValue);
+        return this.hashTable.get(symbol);
     }
 
     // Search for a symbol in the symbol table and return its value
