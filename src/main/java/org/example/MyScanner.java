@@ -197,6 +197,9 @@ public class MyScanner {
             e.printStackTrace();
         }
 
+        System.out.println(scanner.getIdentifierSymbolTable());
+        System.out.println(scanner.getConstantSymbolTable());
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("ST.out"))) {
             writer.write("const table: " + scanner.getConstantSymbolTable() + "\n");
             writer.write("identifier table:" + scanner.getIdentifierSymbolTable());
