@@ -1,0 +1,24 @@
+program&compoundStatement&declarationList&declaration&declaration&type&array_declaration&statementList&statement&simpleStatement&assigment&expression&operation&inOutStatement&inStatement&outStatement&structuredStatement&ifStatement&condition&relation&whileStatement&forStatement
+program&;&{&}&+&-&*&/&)&(&scan&print&IDENTIFIER&CONST&array&[&]&=&if&else&while&return&for&int&string&<&<=&==&!=&>=&>&
+program
+program:=Program { compound_statement }
+compoundStatement:=declarationList|statementList composedStatement
+declarationList:=declaration|declaration declarationList
+declaration:=type IDENTIFIER
+type:=bool|string|int
+array_declaration:=array simple_type IDENTIFIER [ ]
+statementList:=statement|statement statementList
+statement:=simpleStatement|structuredStatement
+simpleStatement:=assigment|inOutStatement
+assigment:=IDENTIFIER -> expression
+expression:=term|expression operation term
+operation:=+|-|*|/
+inOutStatement:=inStatement|outStatement
+inStatement:=scan ( IDENTIFIER )
+outStatement:=print( IDENTIFIER|CONSTANT|expression )
+structuredStatement:=ifStatement|whileStatement|forStatement
+ifStatement:=if( condition ) [ composedStatement ] else [ composedStatement ]
+condition:=expression relation expression|true|false|IDENTIFIER
+relation:=<|<=|==|!=|>=|>
+whileStatement:=while ( condition ) [ composedStatement]
+forStatement:=for ( declaration assigment|assigment , relation , assigment ) [ composedStatement ]

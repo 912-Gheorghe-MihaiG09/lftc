@@ -14,20 +14,6 @@ public class Main {
         SymbolTable indentifierSymbolTable = new SymbolTable();
         SymbolTable constantSymbolTable = new SymbolTable();
 
-//        indentifierSymbolTable.add("a");
-//        constantSymbolTable.add("5");
-//        indentifierSymbolTable.add("b");
-//        constantSymbolTable.add("6");
-//        indentifierSymbolTable.add("a");
-//        indentifierSymbolTable.add("a");
-//        constantSymbolTable.add("3");
-//        indentifierSymbolTable.add("b");
-//        indentifierSymbolTable.add("b");
-//        constantSymbolTable.add("6");
-//        indentifierSymbolTable.add("a");
-//        indentifierSymbolTable.add("a");
-//        indentifierSymbolTable.add("b");
-
 
         // Define the file path
         String reservedWordsPath = "/Users/mihaigheorghe/IdeaProjects/lftc_symbol_table/src/main/java/org/example/token.in";
