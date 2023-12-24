@@ -1,5 +1,8 @@
-S;;A
-0;;1;;2;;3
-S
-S->1 A|2 A|3 A
-A->0|2
+E&T&E'&F&T'
++&*&(&)&id&eps
+E
+E:=T E'
+E':=+ T E'|eps
+T:=F T'
+T':=* F T' |eps
+F:=id|( E )

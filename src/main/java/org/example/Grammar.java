@@ -13,6 +13,10 @@ public class Grammar {
     private final String TRANSITION_CONCATENATION = " ";
     private final String SEPARATOR_LEFT_RIGHT_HAND_SIDE = ":=";
 
+    private String filePath;
+
+    public static final String Epsilon = "eps";
+
     // LR(0)
     private Set<String> nonTerminals;
     private Set<String> terminals;
@@ -40,7 +44,14 @@ public class Grammar {
         return true;
     }
 
-    private void loadFromFile(String filePath) {
+    CFGrammar getCFGrammar(){
+        if(this.checkCFG()){
+            return new CFGrammar(filePath);
+        }
+        return null;
+    }
+
+    private void loadFromFile() {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             this.nonTerminals = new HashSet<>(List.of(scanner.nextLine().split(this.ELEMENT_SEPARATOR)));
             this.terminals = new HashSet<>(List.of(scanner.nextLine().split(this.ELEMENT_SEPARATOR)));
@@ -57,7 +68,8 @@ public class Grammar {
     }
 
     public Grammar(String filePath) {
-        this.loadFromFile(filePath);
+        this.filePath = filePath;
+        loadFromFile();
     }
 
     public Set<String> getNonTerminals() {
@@ -107,11 +119,12 @@ public class Grammar {
         System.out.println("4. Print all productions");
         System.out.println("5. Print all productions for a non terminal");
         System.out.println("6. Is the grammar a context free grammar (CFG) ?");
+        System.out.println("7. Print first & follow ?");
 
     }
 
     public static void runGrammar(){
-        Grammar grammar = new Grammar("/Users/mihaigheorghe/IdeaProjects/lftc_symbol_table/src/main/java/org/example/g2.txt");
+        Grammar grammar = new Grammar("/Users/mihaigheorghe/IdeaProjects/lftc_symbol_table/src/main/java/org/example/g1.txt");
         boolean notStopped = true;
         while(notStopped) {
             printMenu();
@@ -150,6 +163,10 @@ public class Grammar {
                     break;
                 case 6:
                     System.out.println("\n\nIs it a context free grammar (CFG) ? " + grammar.checkCFG());
+                    break;
+                case 7:
+                    LL1Parser parser = new LL1Parser(grammar.getCFGrammar());
+                    parser.printFirstFollowParsingTable();
                     break;
             }
         }
