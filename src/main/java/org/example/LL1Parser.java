@@ -1,11 +1,12 @@
 package org.example;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 class LL1Parser {
     private final Map<String, Set<String>> firstSet = new HashMap<>();
     private final Map<String, Set<String>> followSet = new HashMap<>();
-    private final Map<String, Map<String, String>> parsingTable = new HashMap<>();
+    private final Map<String, Map<String, List<String>>> parsingTable = new HashMap<>();
 
     private final CFGrammar grammar;
 
@@ -14,6 +15,99 @@ class LL1Parser {
         this.grammar = grammar;
         computeFirstSet();
         computeFollowSets();
+        computeParsingTable();
+    }
+
+
+
+    // we left the print in order to see how the algorithm works
+    public ParseTreeNode parse(List<String> input) {
+        // Initialize a stack to perform parsing
+        Stack<ParseTreeNode> stack = new Stack<>();
+        // Add the starting symbol to the stack
+        ParseTreeNode startingNode = new ParseTreeNode(grammar.getStartingSymbol());
+        stack.push(startingNode);
+        // Add the end-of-input marker to the input
+
+        input = new ArrayList<>(input);
+        input.add("$");
+
+        // Start parsing
+        int inputIndex = 0;
+        while (!stack.isEmpty()) {
+            System.out.println("stack: " + stack);
+
+            ParseTreeNode top = stack.pop();
+
+            System.out.println("top: " + top);
+
+            if (grammar.getNonTerminals().contains(top.getSymbol())) {
+                System.out.println("top: " + top + " is non terminal");
+                // If the top of the stack is a non-terminal
+                // Get the production from the parsing table
+                List<String> production = parsingTable.get(top.getSymbol()).get(input.get(inputIndex));
+
+                System.out.println("production: " + production.toString());
+
+                if (production != null) {
+                    // Push the right-hand side of the production onto the stack
+                    for (int i = production.size() - 1; i >= 0; i--) {
+                        if (!production.get(i).equals(CFGrammar.Epsilon)) {
+                            String symbol = production.get(i);
+                            System.out.println("adding symbol to stack: " + symbol);
+                            ParseTreeNode childNode = new ParseTreeNode(symbol);
+                            stack.push(childNode);
+                            System.out.println("new stack: " + stack);
+                            top.addChild(childNode);
+                        }
+                    }
+                } else {
+                    // Handle parsing error
+                    System.out.println("Error: No production in the parsing table for symbol " + top +
+                            " and input symbol " + input.get(inputIndex));
+                    return null;
+                }
+            } else if (top.getSymbol().equals(input.get(inputIndex))) {
+                // If the top of the stack is a terminal and matches the input symbol
+                inputIndex++; // Move to the next input symbol
+            } else {
+                // Handle parsing error
+                System.out.println("Error: Mismatch between stack symbol " + top +
+                        " and input symbol " + input.get(inputIndex));
+                return null;
+            }
+        }
+
+        return startingNode; // Parsing successful
+    }
+    public void computeParsingTable(){
+        for(String nonTerminal : grammar.getNonTerminals()){
+            parsingTable.put(nonTerminal, new HashMap<>());
+
+            for(List<String> prodRule : grammar.getProductions().get(nonTerminal)){
+                if(prodRule.contains(grammar.Epsilon)){
+                    Map<String, List<String>> map = new HashMap<>();
+                    for(String terminal : followSet.get(nonTerminal)){
+                        map.put(terminal, prodRule);
+                    }
+                    parsingTable.get(nonTerminal).putAll(map);
+                } else {
+                    Map<String, List<String>> map = new HashMap<>();
+                    if(grammar.getTerminals().contains(prodRule.get(0))){
+                        map.put(prodRule.get(0), prodRule);
+                    } else {
+                        for (String terminal : computeFirstForList(prodRule)) {
+                            if (!terminal.equals(grammar.Epsilon)) {
+                                map.put(terminal, prodRule);
+                            }
+                        }
+                    }
+                    parsingTable.get(nonTerminal).putAll(map);
+                }
+            }
+        }
+
+        System.out.println(parsingTable);
     }
 
     // Computes the FOLLOW sets for all non-terminals in the grammar
@@ -130,13 +224,110 @@ class LL1Parser {
         for (String nonTerminal : followSet.keySet()) {
             System.out.println(nonTerminal + ": " + followSet.get(nonTerminal));
         }
-//
-//        System.out.println("\nLL(1) Parsing Table:");
-//        for (String nonTerminal : parsingTable.keySet()) {
-//            for (String terminal : parsingTable.get(nonTerminal).keySet()) {
-//                System.out.println("M[" + nonTerminal + ", " + terminal + "] = " + parsingTable.get(nonTerminal).get(terminal));
-//            }
-//        }
+
+        System.out.println();
+        printParsingTable();
+    }
+
+    public void printParsingTable() {
+        List<List<String>> table = new ArrayList<>();
+
+        Set<String> terminalExtended = grammar.getTerminals();
+        terminalExtended.add("$");
+        terminalExtended.remove(grammar.Epsilon);
+
+        List<String> header = new ArrayList<>();
+        header.add(" ");
+        header.addAll(terminalExtended);
+
+        table.add(header);
+
+
+
+        for(String key : parsingTable.keySet()){
+            List<String> row = new ArrayList<>();
+            row.add(key);
+            for(String terminal : terminalExtended){
+                if(parsingTable.get(key).containsKey(terminal)){
+                    row.add(parsingTable.get(key).get(terminal).toString());
+                }
+                else {
+                    row.add("");
+                }
+            }
+            table.add(row);
+        }
+
+        // Calculate appropriate Length of each column by looking at width of data in each column.
+        Map<Integer, Integer> columnLengths = new HashMap<>();
+        table.forEach(a -> Stream.iterate(0, (i -> i < a.size()), (i -> ++i)).forEach(i -> {
+            columnLengths.putIfAbsent(i, 0);
+            if (columnLengths.get(i) < a.get(i).length()) {
+                columnLengths.put(i, a.get(i).length());
+            }
+        }));
+
+         // Prepare format String
+        final StringBuilder formatString = new StringBuilder("");
+        columnLengths.entrySet().stream().forEach(e -> formatString.append("| %-" + e.getValue() + "s "));
+        formatString.append("|\n");
+
+        for(List<String> rowTable : table) {
+            System.out.printf(formatString.toString(), rowTable.toArray());
+        }
     }
 }
 
+
+
+class ParseTreeNode {
+    private String symbol;
+    private List<ParseTreeNode> children;
+
+    public ParseTreeNode(String symbol) {
+        this.symbol = symbol;
+        this.children = new ArrayList<>();
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public List<ParseTreeNode> getChildren() {
+        return children;
+    }
+
+    public void addChild(ParseTreeNode child) {
+        children.add(child);
+    }
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
+}
+
+// this class helps us to print the parsing tree,
+// the parsing tree must be read from the bottom to the top
+class ParseTreePrinter {
+    public static void printTree(ParseTreeNode root) {
+        printTree(root, 0);
+    }
+
+    private static void printTree(ParseTreeNode node, int depth) {
+        // Print the current node
+        printIndent(depth);
+        System.out.println(node);
+
+        // Recursively print the children
+        for (ParseTreeNode child : node.getChildren()) {
+            printTree(child, depth + 1);
+        }
+    }
+
+    private static void printIndent(int depth) {
+        for (int i = 0; i < depth; i++) {
+            System.out.print("  "); // You can adjust the number of spaces for indentation
+        }
+    }
+}

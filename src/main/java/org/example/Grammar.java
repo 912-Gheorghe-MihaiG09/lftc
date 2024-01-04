@@ -119,12 +119,14 @@ public class Grammar {
         System.out.println("4. Print all productions");
         System.out.println("5. Print all productions for a non terminal");
         System.out.println("6. Is the grammar a context free grammar (CFG) ?");
-        System.out.println("7. Print first & follow ?");
+        System.out.println("7. Print first & follow & parsing table");
+        System.out.println("8. Parse expression");
 
     }
 
     public static void runGrammar(){
         Grammar grammar = new Grammar("/Users/mihaigheorghe/IdeaProjects/lftc_symbol_table/src/main/java/org/example/g1.txt");
+        LL1Parser parser = new LL1Parser(grammar.getCFGrammar());
         boolean notStopped = true;
         while(notStopped) {
             printMenu();
@@ -149,7 +151,7 @@ public class Grammar {
                     grammar.getProductions().forEach((lhs, rhs)-> System.out.println(lhs + " -> " + rhs));
                     break;
                 case 5:
-                    Scanner sc= new Scanner(System.in); //System.in is a standard input stream.
+                    Scanner sc = new Scanner(System.in); //System.in is a standard input stream.
                     System.out.print("Enter a non-terminal: ");
                     String nonTerminal= sc.nextLine(); //reads string.
                     System.out.println("\n\n Productions for the non-terminal: " + nonTerminal);
@@ -165,8 +167,19 @@ public class Grammar {
                     System.out.println("\n\nIs it a context free grammar (CFG) ? " + grammar.checkCFG());
                     break;
                 case 7:
-                    LL1Parser parser = new LL1Parser(grammar.getCFGrammar());
                     parser.printFirstFollowParsingTable();
+                    break;
+                case 8:
+                    System.out.print("Enter expression to be parsed (ex: id + id * id): ");
+                    Scanner input = new Scanner(System.in);
+                    String expression = input.nextLine();
+                    ParseTreeNode startingNode = parser.parse(List.of(expression.split("\\s")));
+                    if(startingNode != null){
+                        ParseTreePrinter.printTree(startingNode);
+                    } else {
+                        System.out.println("expression cannot be parsed");
+                    }
+//                    System.out.println(parser.parse(List.of(expression.split("\\s"))));
                     break;
             }
         }
